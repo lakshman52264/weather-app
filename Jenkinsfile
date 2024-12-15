@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_USER = 'lakshman52264'  // Your Docker Hub username
+        DOCKER_USER = 'lakshman52264'  // Docker Hub username
     }
     stages {
         stage('Clone Repository') {
@@ -12,8 +12,8 @@ pipeline {
         stage('Build Docker Images') {
             steps {
                 echo "Building Docker images..."
-                bat 'docker build -t ${DOCKER_USER}/weather-backend -f Dockerfile .'
-                bat 'docker build -t ${DOCKER_USER}/weather-frontend ./frontend'
+                bat 'docker build -t %DOCKER_USER%/weather-backend -f Dockerfile .'
+                bat 'docker build -t %DOCKER_USER%/weather-frontend ./frontend'
             }
         }
         stage('Push Docker Images') {
@@ -22,8 +22,8 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     bat '''
                         echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
-                        docker push ${DOCKER_USER}/weather-backend
-                        docker push ${DOCKER_USER}/weather-frontend
+                        docker push %DOCKER_USER%/weather-backend
+                        docker push %DOCKER_USER%/weather-frontend
                     '''
                 }
             }
