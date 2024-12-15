@@ -11,7 +11,7 @@ pipeline {
         }
         stage('Build Docker Images') {
             steps {
-                bat 'docker build -t lakshman52264/weather-backend ./backend'
+                bat 'docker build -t lakshman52264/weather-backend -f Dockerfile .'
                 bat 'docker build -t lakshman52264/weather-frontend ./frontend'
             }
         }
