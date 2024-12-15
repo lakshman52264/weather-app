@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-creds')  // Docker Hub credentials
+        DOCKER_USER = 'lakshman52264'  // Your Docker Hub username
     }
     stages {
         stage('Clone Repository') {
@@ -11,23 +11,39 @@ pipeline {
         }
         stage('Build Docker Images') {
             steps {
-                bat 'docker build -t lakshman52264/weather-backend -f Dockerfile .'
-                bat 'docker build -t lakshman52264/weather-frontend ./frontend'
+                echo "Building Docker images..."
+                bat 'docker build -t ${DOCKER_USER}/weather-backend -f Dockerfile .'
+                bat 'docker build -t ${DOCKER_USER}/weather-frontend ./frontend'
             }
         }
         stage('Push Docker Images') {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-creds', url: '']) {
-                    bat 'docker push lakshman52264/weather-backend'
-                    bat 'docker push lakshman52264/weather-frontend'
+                echo "Pushing Docker images to Docker Hub..."
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    bat '''
+                        echo %DOCKER_PASS% | docker login -u %DOCKER_USER% --password-stdin
+                        docker push ${DOCKER_USER}/weather-backend
+                        docker push ${DOCKER_USER}/weather-frontend
+                    '''
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
-                bat 'kubectl apply -f k8s/backend-deployment.yaml'
-                bat 'kubectl apply -f k8s/frontend-deployment.yaml'
+                echo "Deploying to Kubernetes..."
+                bat '''
+                    kubectl apply -f k8s/backend-deployment.yaml
+                    kubectl apply -f k8s/frontend-deployment.yaml
+                '''
             }
+        }
+    }
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed. Check logs for more details."
         }
     }
 }
