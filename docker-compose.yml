@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile  # Default Dockerfile in the backend folder
+    ports:
+      - "8000:8000"
+    container_name: weather-backend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile  # Default Dockerfile in the frontend folder
+    ports:
+      - "3000:3000"
+    container_name: weather-frontend
